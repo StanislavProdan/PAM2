@@ -53,25 +53,6 @@ class _HomePageState extends State<HomePage> {
           children: [_homeContent(context), _profileContent(context)],
         ),
       ),
-      bottomNavigationBar: NavigationBar(
-        height: 72,
-        selectedIndex: selectedTab,
-        onDestinationSelected: (index) => setState(() => selectedTab = index),
-        backgroundColor: Colors.white,
-        indicatorColor: const Color(0xffe9edff),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-      ),
     );
   }
 
@@ -150,7 +131,7 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
-          const SizedBox(height: 74),
+          const SizedBox(height: 48),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
@@ -432,11 +413,8 @@ class _HomePageState extends State<HomePage> {
   Widget _avatar() => Container(
     width: 48,
     height: 48,
-    decoration: const BoxDecoration(
-      color: Color(0xffffe5df),
-      shape: BoxShape.circle,
-    ),
-    child: const Icon(Icons.face_3, color: Color(0xff763c32), size: 33),
+    decoration: const BoxDecoration(shape: BoxShape.circle),
+    child: CustomPaint(painter: _AvatarPainter()),
   );
 
   Widget _progressCard() => GestureDetector(
@@ -507,9 +485,12 @@ class _HomePageState extends State<HomePage> {
 
   Widget _promoCard(BuildContext context) => SizedBox(
     height: 152,
-    child: Row(
+    child: ListView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
       children: [
-        Expanded(
+        SizedBox(
+          width: 250,
           child: Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
@@ -517,13 +498,18 @@ class _HomePageState extends State<HomePage> {
               borderRadius: BorderRadius.circular(16),
             ),
             child: Stack(
+              clipBehavior: Clip.hardEdge,
               children: [
-                const Text(
-                  'What do you want to learn today?',
-                  style: TextStyle(
-                    color: navy,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                const SizedBox(
+                  width: 190,
+                  child: Text(
+                    'What do you want to learn today?',
+                    style: TextStyle(
+                      color: navy,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      height: 1.15,
+                    ),
                   ),
                 ),
                 Positioned(
@@ -540,7 +526,8 @@ class _HomePageState extends State<HomePage> {
                       backgroundColor: orange,
                       foregroundColor: Colors.white,
                       elevation: 0,
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      minimumSize: const Size(0, 32),
+                      padding: const EdgeInsets.symmetric(horizontal: 11),
                     ),
                     child: const Text(
                       'Get Started',
@@ -551,10 +538,14 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ),
-                const Positioned(
-                  right: 3,
-                  bottom: -2,
-                  child: Icon(Icons.person, size: 86, color: Color(0xffe74b27)),
+                Positioned(
+                  right: -4,
+                  bottom: -19,
+                  child: SizedBox(
+                    width: 132,
+                    height: 132,
+                    child: CustomPaint(painter: _LearningPainter()),
+                  ),
                 ),
               ],
             ),
@@ -567,7 +558,7 @@ class _HomePageState extends State<HomePage> {
             MaterialPageRoute(builder: (_) => const CourseOverviewPage()),
           ),
           child: Container(
-            width: 78,
+            width: 250,
             decoration: BoxDecoration(
               color: const Color(0xffdff8f4),
               borderRadius: BorderRadius.circular(16),
@@ -865,8 +856,12 @@ class _CourseOverviewPageState extends State<CourseOverviewPage> {
               ),
             ),
           ),
-          const Center(
-            child: Icon(Icons.person, color: Color(0xffc9957b), size: 115),
+          Center(
+            child: SizedBox(
+              width: 150,
+              height: 150,
+              child: CustomPaint(painter: _CoursePersonPainter()),
+            ),
           ),
           Center(
             child: Container(
@@ -1003,4 +998,168 @@ class _CourseOverviewPageState extends State<CourseOverviewPage> {
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(message)));
   }
+}
+
+class _AvatarPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    canvas.drawCircle(
+      center,
+      size.width / 2,
+      Paint()..color = const Color(0xffffe6df),
+    );
+
+    final skin = Paint()..color = const Color(0xff8f3e2d);
+    canvas.drawCircle(center.translate(0, 2), size.width * .22, skin);
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: center.translate(0, -size.height * .12),
+        width: size.width * .46,
+        height: size.height * .28,
+      ),
+      Paint()..color = const Color(0xff2f2426),
+    );
+
+    final shirt = Path()
+      ..moveTo(size.width * .22, size.height)
+      ..quadraticBezierTo(
+        size.width * .22,
+        size.height * .64,
+        size.width * .5,
+        size.height * .62,
+      )
+      ..quadraticBezierTo(
+        size.width * .78,
+        size.height * .64,
+        size.width * .78,
+        size.height,
+      )
+      ..close();
+    canvas.drawPath(shirt, Paint()..color = const Color(0xffee5c35));
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _LearningPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..style = PaintingStyle.fill;
+    final skin = const Color(0xffd86a3d);
+    final hair = const Color(0xffe78338);
+
+    paint.color = hair;
+    canvas.drawCircle(
+      Offset(size.width * .65, size.height * .43),
+      size.width * .2,
+      paint,
+    );
+    paint.color = skin;
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(size.width * .66, size.height * .49),
+        width: size.width * .24,
+        height: size.height * .28,
+      ),
+      paint,
+    );
+
+    final arm = Path()
+      ..moveTo(size.width * .48, size.height * .67)
+      ..quadraticBezierTo(
+        size.width * .58,
+        size.height * .53,
+        size.width * .62,
+        size.height * .35,
+      )
+      ..lineTo(size.width * .72, size.height * .38)
+      ..quadraticBezierTo(
+        size.width * .72,
+        size.height * .67,
+        size.width * .9,
+        size.height * .79,
+      )
+      ..lineTo(size.width * .82, size.height * .98)
+      ..quadraticBezierTo(
+        size.width * .58,
+        size.height * .85,
+        size.width * .48,
+        size.height * .67,
+      )
+      ..close();
+    paint.color = const Color(0xff2956bc);
+    canvas.drawPath(arm, paint);
+    paint.color = skin;
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(size.width * .5, size.height * .2),
+        width: size.width * .12,
+        height: size.height * .35,
+      ),
+      paint,
+    );
+    paint.color = const Color(0xffe74b27);
+    canvas.drawCircle(
+      Offset(size.width * .78, size.height * .88),
+      size.width * .12,
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _CoursePersonPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height * .42);
+    final paint = Paint()..style = PaintingStyle.fill;
+    paint.color = const Color(0xffc98b70);
+    canvas.drawCircle(center, size.width * .18, paint);
+    paint.color = const Color(0xff5e3327);
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: center.translate(0, -size.height * .08),
+        width: size.width * .4,
+        height: size.height * .28,
+      ),
+      paint,
+    );
+    paint.color = const Color(0xff405163);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(
+          size.width * .24,
+          size.height * .56,
+          size.width * .52,
+          size.height * .48,
+        ),
+        const Radius.circular(18),
+      ),
+      paint,
+    );
+    paint.color = const Color(0xffd2a486);
+    canvas.drawLine(
+      Offset(size.width * .42, size.height * .64),
+      Offset(size.width * .36, size.height),
+      Paint()
+        ..color = paint.color
+        ..strokeWidth = size.width * .12
+        ..strokeCap = StrokeCap.round,
+    );
+    canvas.drawLine(
+      Offset(size.width * .58, size.height * .64),
+      Offset(size.width * .64, size.height),
+      Paint()
+        ..color = paint.color
+        ..strokeWidth = size.width * .12
+        ..strokeCap = StrokeCap.round,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
